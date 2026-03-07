@@ -559,6 +559,7 @@ function CreateGaragePolyZones()
     }, {
         door_garage_id = 'dpd_gate3',
     })
+
 end
 
 local rLimited = false
