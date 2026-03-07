@@ -414,7 +414,10 @@ function CheckPlayerAuth(source, doorPermissionData)
 					end
 				elseif v.type == 'job' then
 					if v.job then
-						if Jobs.Permissions:HasJob(source, v.job, v.workplace, v.grade, v.gradeLevel, v.reqDuty, v.jobPermission) then
+						local wp = (v.workplace and v.workplace ~= '' and v.workplace ~= 'false') and v.workplace or false
+						local gr = (v.grade and v.grade ~= '' and v.grade ~= 'false') and v.grade or false
+						local gl = (v.gradeLevel and tonumber(v.gradeLevel) and tonumber(v.gradeLevel) > 0) and tonumber(v.gradeLevel) or false
+						if Jobs.Permissions:HasJob(source, v.job, wp, gr, gl, v.reqDuty, v.jobPermission) then
 							return true
 						end
 					elseif v.jobPermission then

@@ -221,7 +221,10 @@ DOORS = {
 					end
 				elseif v.type == 'job' then
 					if v.job then
-						if Jobs.Permissions:HasJob(v.job, v.workplace, v.grade, v.gradeLevel, v.reqDuty, v.jobPermission) then
+						local wp = (v.workplace and v.workplace ~= '' and v.workplace ~= 'false') and v.workplace or false
+						local gr = (v.grade and v.grade ~= '' and v.grade ~= 'false') and v.grade or false
+						local gl = (v.gradeLevel and tonumber(v.gradeLevel) and tonumber(v.gradeLevel) > 0) and tonumber(v.gradeLevel) or false
+						if Jobs.Permissions:HasJob(v.job, wp, gr, gl, v.reqDuty, v.jobPermission) then
 							return true
 						end
 					elseif v.jobPermission then
@@ -292,7 +295,6 @@ function StartCharacterThreads()
 				local pedCoords = GetEntityCoords(GLOBAL_PED)
 				local closestDoor = false
 				local closestDist = 999
-
 				for k, v in pairs(DOORS_STATE) do
 					if v.special and v.coords then
 						local dist = #(pedCoords - v.coords)
@@ -474,6 +476,10 @@ RegisterNetEvent('Doors:Client:AddDynamicDoor', function(index, door)
 	local doorData = door
 	doorData.doorId = index
 
+	if type(doorData.coords) ~= 'vector3' then
+		doorData.coords = vector3(doorData.coords.x + 0.0, doorData.coords.y + 0.0, doorData.coords.z + 0.0)
+	end
+
 	AddDoorToSystem(index, doorData.model, doorData.coords.x, doorData.coords.y, doorData.coords.z)
 
 	if type(doorData.autoRate) == "number" and doorData.autoRate > 0.0 then
@@ -526,6 +532,7 @@ RegisterNetEvent('Doors:Client:UpdateDynamicDoor', function(index, door)
 	else
 		DoorSystemSetHoldOpen(index, false)
 	end
+
 end)
 
 RegisterNetEvent('Doors:Client:RemoveDynamicDoor', function(index)
