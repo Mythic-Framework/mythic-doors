@@ -38,9 +38,9 @@ AddEventHandler('Core:Shared:Ready', function()
     }, function(error)
         if #error > 0 then return end
         RetrieveComponents()
+        RegisterCallbacks()
         LoadDynamicDoors()
         LoadDynamicElevators()
-        RegisterCallbacks()
         RegisterItems()
         RegisterChatCommands()
 
@@ -80,6 +80,40 @@ function RunStartup()
     end
 
     Logger:Trace('Doors', 'Loaded ^2'.. #_doorConfig .. '^7 Doors & ^2'.. #_elevatorConfig .. '^7 Elevators')
+end
+
+local function SerializeElevatorFloorsForDB(floors)
+    local dbFloors = {}
+    for floorKey, floorData in pairs(floors) do
+        local key = tostring(floorKey)
+        dbFloors[key] = {
+            name = floorData.name,
+            coords = {
+                x = floorData.coords.x + 0.0,
+                y = floorData.coords.y + 0.0,
+                z = floorData.coords.z + 0.0,
+                w = floorData.coords.w + 0.0,
+            },
+            defaultLocked = floorData.defaultLocked or false,
+            restricted = floorData.restricted or nil,
+            bypassLock = floorData.bypassLock or nil,
+        }
+        if floorData.zone then
+            dbFloors[key].zone = {
+                center = {
+                    x = floorData.zone.center.x + 0.0,
+                    y = floorData.zone.center.y + 0.0,
+                    z = floorData.zone.center.z + 0.0,
+                },
+                length = floorData.zone.length + 0.0,
+                width = floorData.zone.width + 0.0,
+                heading = floorData.zone.heading + 0.0,
+                minZ = floorData.zone.minZ + 0.0,
+                maxZ = floorData.zone.maxZ + 0.0,
+            }
+        end
+    end
+    return dbFloors
 end
 
 function RegisterChatCommands()
@@ -235,6 +269,9 @@ end)
 
 function RegisterCallbacks()
     Callbacks:RegisterServerCallback('Doors:Fetch', function(source, data, cb)
+        while not _startup do
+            Wait(100)
+        end
         cb(DOORS_CACHE, ELEVATOR_CACHE, _doorConfig, _elevatorConfig)
     end)
 
@@ -775,40 +812,6 @@ function LoadDynamicElevators()
     if count > 0 then
         Logger:Trace('Doors', 'Loaded ^2' .. count .. '^7 Elevators From Database')
     end
-end
-
-local function SerializeElevatorFloorsForDB(floors)
-    local dbFloors = {}
-    for floorKey, floorData in pairs(floors) do
-        local key = tostring(floorKey)
-        dbFloors[key] = {
-            name = floorData.name,
-            coords = {
-                x = floorData.coords.x + 0.0,
-                y = floorData.coords.y + 0.0,
-                z = floorData.coords.z + 0.0,
-                w = floorData.coords.w + 0.0,
-            },
-            defaultLocked = floorData.defaultLocked or false,
-            restricted = floorData.restricted or nil,
-            bypassLock = floorData.bypassLock or nil,
-        }
-        if floorData.zone then
-            dbFloors[key].zone = {
-                center = {
-                    x = floorData.zone.center.x + 0.0,
-                    y = floorData.zone.center.y + 0.0,
-                    z = floorData.zone.center.z + 0.0,
-                },
-                length = floorData.zone.length + 0.0,
-                width = floorData.zone.width + 0.0,
-                heading = floorData.zone.heading + 0.0,
-                minZ = floorData.zone.minZ + 0.0,
-                maxZ = floorData.zone.maxZ + 0.0,
-            }
-        end
-    end
-    return dbFloors
 end
 
 local function ParseElevatorDataFromAdmin(data)
