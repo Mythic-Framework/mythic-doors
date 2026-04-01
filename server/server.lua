@@ -19,6 +19,7 @@ function RetrieveComponents()
     Pwnzor = exports['mythic-base']:FetchComponent('Pwnzor')
     Properties = exports['mythic-base']:FetchComponent('Properties')
     Database = exports['mythic-base']:FetchComponent('Database')
+    Version = exports['mythic-base']:FetchComponent('Version')
 end
 
 AddEventHandler('Core:Shared:Ready', function()
@@ -35,6 +36,7 @@ AddEventHandler('Core:Shared:Ready', function()
         'Pwnzor',
         'Properties',
         'Database',
+        'Version',
     }, function(error)
         if #error > 0 then return end
         RetrieveComponents()
@@ -45,6 +47,8 @@ AddEventHandler('Core:Shared:Ready', function()
         RegisterChatCommands()
 
         RunStartup()
+
+        Version:Check('Mythic-Framework/Mythic-VersionCheckers', GetCurrentResourceName())
     end)
 end)
 
